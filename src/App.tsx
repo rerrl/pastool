@@ -1,19 +1,11 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 
-interface PasswordStoreEntry {
-  path: string;
-  is_folder: boolean;
-  is_encrypted: boolean;
-}
-
 function App() {
-  const [fullPasswordList, setFullPasswordList] = useState<
-    PasswordStoreEntry[]
-  >([]);
-  const [filteredPasswordList, setFilteredPasswordList] = useState<
-    PasswordStoreEntry[]
-  >([]);
+  const [fullPasswordList, setFullPasswordList] = useState<string[]>([]);
+  const [filteredPasswordList, setFilteredPasswordList] = useState<string[]>(
+    []
+  );
 
   const makePathRelativeToPasswordStore = (path: string) => {
     return path.split(".password-store/")[1];
@@ -25,30 +17,23 @@ function App() {
       return;
     }
 
-    console.log("searcing for " + e.target.value);
+    const searchStrings = e.target.value.split(" ");
     setFilteredPasswordList(
       fullPasswordList.filter((entry) => {
-        return entry.path.includes(e.target.value);
+        return searchStrings.every((searchString) => {
+          return entry.includes(searchString);
+        });
       })
     );
   };
 
   async function load_password_store() {
-    console.log("loading password store...");
-    const result = (await invoke(
-      "load_password_store"
-    )) as PasswordStoreEntry[];
-    setFullPasswordList(
-      result.map((content) => {
-        return {
-          path: makePathRelativeToPasswordStore(content.path),
-          is_folder: content.is_folder,
-          is_encrypted: content.is_encrypted,
-        };
-      })
+    const result = (await invoke("load_password_store")) as string[];
+    const initialPasswordList = result.map((content) =>
+      makePathRelativeToPasswordStore(content)
     );
-
-    setFilteredPasswordList(fullPasswordList);
+    setFullPasswordList(initialPasswordList);
+    setFilteredPasswordList(initialPasswordList);
   }
 
   useEffect(() => {
@@ -66,8 +51,8 @@ function App() {
       />
 
       {filteredPasswordList.map((entry) => (
-        <div className="row" key={entry.path}>
-          {entry.path}
+        <div className="row" key={entry}>
+          {entry}
         </div>
       ))}
     </main>
