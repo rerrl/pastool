@@ -29,11 +29,11 @@ function App() {
 
   async function copyEncryptedPasswordToClipboard(relativePath: string) {
     try {
-      await invoke("copy_encrypted_password_to_clipboard", {
+      const result = (await invoke("copy_encrypted_password_to_clipboard", {
         relativePath: relativePath.replace(".gpg", ""),
-      });
+      })) as string;
 
-      alert("Copied to clipboard!");
+      alert(result);
     } catch (error) {
       console.error(error);
     }

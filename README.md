@@ -10,4 +10,5 @@ Goals:
 - cross platform (windows, linux, macos)
 
 
-
+To Add:
+- [ ] Clear clipboard after 45 seconds from last copy
