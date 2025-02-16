@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import "./App.css";
 
 interface PasswordStoreEntry {
   path: string;
@@ -13,18 +12,22 @@ function App() {
 
   const makePathRelativeToPasswordStore = (path: string) => {
     return path.split(".password-store/")[1];
-  }
+  };
 
   async function load_password_store() {
     console.log("loading password store...");
-    const result = await invoke("load_password_store") as PasswordStoreEntry[];
-    setPasswordList(result.map(content => {
-      return {
-        path: makePathRelativeToPasswordStore(content.path),
-        is_folder: content.is_folder,
-        is_encrypted: content.is_encrypted,
-      }
-    }));
+    const result = (await invoke(
+      "load_password_store"
+    )) as PasswordStoreEntry[];
+    setPasswordList(
+      result.map((content) => {
+        return {
+          path: makePathRelativeToPasswordStore(content.path),
+          is_folder: content.is_folder,
+          is_encrypted: content.is_encrypted,
+        };
+      })
+    );
   }
 
   useEffect(() => {
@@ -32,15 +35,14 @@ function App() {
   }, []);
 
   return (
-    <main className="container">
-      <h1>Password Store</h1>
-      
-        {passwordList.map((entry) => (
-          <div className="row" key={entry.path}>
-            {entry.path}
-          </div>
-        ))}
-      
+    <main className="flex flex-col items-center justify-center">
+      <h1 className="text-3xl font-bold my-4">Password Store</h1>
+
+      {passwordList.map((entry) => (
+        <div className="row" key={entry.path}>
+          {entry.path}
+        </div>
+      ))}
     </main>
   );
 }
