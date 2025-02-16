@@ -7,20 +7,33 @@ use tauri::tray::TrayIconBuilder;
 use tauri::Manager;
 use tauri_plugin_clipboard_manager::ClipboardExt;
 
+#[derive(serde::Serialize, serde::Deserialize)]
+struct SystemStatus {
+    has_gpg: bool,
+    has_pass: bool,
+    has_pass_store: bool,
+}
+
+#[tauri::command]
+async fn initialize() -> Result<SystemStatus, String> {
+    let home_dir =
+        env::home_dir().ok_or_else(|| "Failed to retrieve home directory".to_string())?;
+    let password_store = home_dir.join(".password-store");
+    let has_pass_store = password_store.exists() && password_store.is_dir();
+
+    Ok(SystemStatus {
+        has_gpg: Command::new("gpg").arg("--version").output().is_ok(),
+        has_pass: Command::new("pass").arg("--version").output().is_ok(),
+        has_pass_store,
+    })
+}
+
 #[tauri::command]
 async fn load_password_store() -> Result<Vec<String>, String> {
     // Use the home directory to construct the path
     let home_dir =
         env::home_dir().ok_or_else(|| "Failed to retrieve home directory".to_string())?;
     let password_store = home_dir.join(".password-store");
-
-    // Check if the path exists and is a directory
-    if !password_store.exists() || !password_store.is_dir() {
-        return Err(format!(
-            "The password store directory '{}' does not exist or is not a directory",
-            password_store.display()
-        ));
-    }
 
     Ok(search_for_gpg_files(&password_store))
 }
@@ -137,6 +150,7 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            initialize,
             load_password_store,
             copy_encrypted_password_to_clipboard
         ])
