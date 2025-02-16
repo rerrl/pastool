@@ -1,6 +1,7 @@
 use std::env;
 use std::fs;
 use std::path::Path;
+use std::process::Command;
 
 #[tauri::command]
 async fn load_password_store() -> Result<Vec<String>, String> {
@@ -44,11 +45,38 @@ fn search_for_gpg_files(path: &Path) -> Vec<String> {
     result
 }
 
+#[tauri::command]
+async fn copy_encrypted_password_to_clipboard(relative_path: String) -> Result<String, String> {
+    // let mut command = Command::new("gpg");
+    // command.arg("--decrypt");
+    // command.arg(full_path);
+    // command.arg("-o");
+    // command.arg("-");
+
+    println!("relative_path: {}", relative_path);
+
+    let mut command = Command::new("pass");
+    command.arg(relative_path);
+
+    let output = command.output().unwrap();
+    println!("output: {:?}", output);
+
+    if output.status.success() {
+        let output = String::from_utf8(output.stdout).unwrap();
+        Ok(output)
+    } else {
+        Err(format!("Error decrypting password: {}", output.status))
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![load_password_store])
+        .invoke_handler(tauri::generate_handler![
+            load_password_store,
+            copy_encrypted_password_to_clipboard
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

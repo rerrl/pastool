@@ -27,10 +27,23 @@ function App() {
     );
   };
 
+  async function copyEncryptedPasswordToClipboard(relativePath: string) {
+    try {
+      await invoke("copy_encrypted_password_to_clipboard", {
+        relativePath: relativePath.replace(".gpg", ""),
+      });
+
+      alert("Copied to clipboard!");
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   async function load_password_store() {
-    const result = (await invoke("load_password_store")) as string[];
-    const initialPasswordList = result.map((content) =>
-      makePathRelativeToPasswordStore(content)
+    const paths = (await invoke("load_password_store")) as string[];
+
+    const initialPasswordList = paths.map((path) =>
+      makePathRelativeToPasswordStore(path)
     );
     setFullPasswordList(initialPasswordList);
     setFilteredPasswordList(initialPasswordList);
@@ -51,7 +64,14 @@ function App() {
       />
 
       {filteredPasswordList.map((entry) => (
-        <div className="row" key={entry}>
+        <div
+          className="py-1 w-full bg-black rounded-lg mb-2 px-2 hover:bg-gray-800 cursor-pointer"
+          onClick={() => {
+            console.log("clicked on " + entry);
+            copyEncryptedPasswordToClipboard(entry);
+          }}
+          key={entry}
+        >
           {entry}
         </div>
       ))}
