@@ -88,6 +88,12 @@ button:active {
   background-color: #e8e8e8;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  border: none;
+  opacity: 0.5;
+}
+
 input,
 button {
   outline: none;

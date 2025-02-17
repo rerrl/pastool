@@ -2,7 +2,7 @@ import { useState } from "react";
 import Checkbox from "./Checkbox";
 import { invoke } from "@tauri-apps/api/core";
 
-export default function GenerateNewPass() {
+export default function GenerateNewPass({ homeDir }: { homeDir: string }) {
   // const [copyToClipboardOnCreate, setCopyToClipboardOnCreate] = useState(true);
   const [noSymbolOnPassword, setNoSymbolOnPassword] = useState(false);
   const [passwordLength, setPasswordLength] = useState(25);
@@ -10,9 +10,18 @@ export default function GenerateNewPass() {
   const [passwordName, setPasswordName] = useState("");
 
   const onGenerateClick = () => {
-    console.log(
-      `Generating password with length ${passwordLength}, no symbols: ${noSymbolOnPassword}`
-    );
+    console.log({
+      fullPath:
+        saveFolder.replace("~", homeDir) +
+        "/" +
+        passwordName.replace(".gpg", "") +
+        ".gpg",
+      length: passwordLength,
+      noSymbols: noSymbolOnPassword,
+    });
+
+    // Make sure to throw from the invoke call if this file already exists.
+    // There is no support for overwriting using pass right now
   };
 
   const onSelectFolderClick = async () => {
@@ -100,7 +109,7 @@ export default function GenerateNewPass() {
         {/* generate pass button */}
         <button
           onClick={onGenerateClick}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          disabled={passwordName.length === 0 || passwordLength === 0}
         >
           Generate
         </button>

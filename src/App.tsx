@@ -52,7 +52,6 @@ function App() {
       }
 
       setHomeDir(res.home_dir);
-      console.log(res.home_dir);
 
       await load_password_store();
       setIsInitialized(true);
@@ -105,7 +104,7 @@ function App() {
           {screen === "search" ? (
             <SearchPassStore passwordList={fullPasswordList} />
           ) : (
-            <GenerateNewPass />
+            <GenerateNewPass homeDir={homeDir} />
           )}
         </>
       )}
