@@ -2,6 +2,7 @@ use std::env;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
+use tauri::ipc::RuntimeCapability;
 use tauri::menu::{MenuBuilder, MenuItemBuilder};
 // use tauri::tray::MouseButton;
 // use tauri::tray::MouseButtonState;
@@ -9,12 +10,15 @@ use tauri::menu::{MenuBuilder, MenuItemBuilder};
 use tauri::tray::TrayIconBuilder;
 use tauri::Manager;
 use tauri_plugin_clipboard_manager::ClipboardExt;
+use tauri_plugin_dialog::DialogExt;
+use tauri_plugin_dialog::FileDialogBuilder;
 
 #[derive(serde::Serialize, serde::Deserialize)]
 struct SystemStatus {
     has_gpg: bool,
     has_pass: bool,
     has_pass_store: bool,
+    home_dir: String,
 }
 
 #[tauri::command]
@@ -27,6 +31,7 @@ async fn initialize() -> Result<SystemStatus, String> {
         has_gpg: Command::new("gpg").arg("--version").output().is_ok(),
         has_pass: Command::new("pass").arg("--version").output().is_ok(),
         has_pass_store: password_store.exists() && password_store.is_dir(),
+        home_dir: home_dir.to_string_lossy().to_string(),
     })
 }
 
@@ -86,19 +91,34 @@ async fn copy_encrypted_password_to_clipboard(
     }
 }
 
+#[tauri::command]
+async fn open_dialog(app: tauri::AppHandle) -> Result<String, String> {
+    let home_dir =
+        env::home_dir().ok_or_else(|| "Failed to retrieve home directory".to_string())?;
+    let password_store = home_dir.join(".password-store");
+
+    let file_path = app
+        .dialog()
+        .file()
+        .add_filter("Folder", &["folder"])
+        .set_directory(password_store)
+        .set_title("Select a folder to save your new password")
+        .blocking_pick_folder()
+        .ok_or_else(|| "No folder selected".to_string())?;
+
+    Ok(file_path.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
             let quit = MenuItemBuilder::new("Quit").id("quit").build(app).unwrap();
             let show = MenuItemBuilder::new("Show").id("show").build(app).unwrap();
             let hide = MenuItemBuilder::new("Hide").id("hide").build(app).unwrap();
-            // let gen_new_pass = MenuItemBuilder::new("Gen. New Pass")
-            //     .id("gen_new_pass")
-            //     .build(app)
-            //     .unwrap();
 
             // we could opt handle an error case better than calling unwrap
             let menu = MenuBuilder::new(app)
@@ -150,7 +170,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             initialize,
             load_password_store,
-            copy_encrypted_password_to_clipboard
+            copy_encrypted_password_to_clipboard,
+            open_dialog
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -7,6 +7,7 @@ interface SystemStatus {
   has_gpg: boolean;
   has_pass: boolean;
   has_pass_store: boolean;
+  home_dir: string;
 }
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
   const [screen, setScreen] = useState<"search" | "generate-new">("search");
   const [startupMessage, setStartupMessage] = useState("Initializing...");
   const [fullPasswordList, setFullPasswordList] = useState<string[]>([]);
+  const [homeDir, setHomeDir] = useState("");
 
   const makePathRelativeToPasswordStore = (path: string) => {
     return path.split(".password-store/")[1];
@@ -49,6 +51,9 @@ function App() {
         return;
       }
 
+      setHomeDir(res.home_dir);
+      console.log(res.home_dir);
+
       await load_password_store();
       setIsInitialized(true);
     } catch (error) {
@@ -64,31 +69,34 @@ function App() {
     <main className="flex flex-col items-center justify-center">
       <h1 className="text-3xl font-bold my-4">Password Store</h1>
       {isInitialized && (
-        <div className="flex items-center justify-center my-4 space-x-5">
-          {/* radio buttons */}
-          <div className="flex items-center space-x-2">
-            <input
-              type="radio"
-              name="screen"
-              id="search"
-              value="search"
-              checked={screen === "search"}
-              onChange={() => setScreen("search")}
-            />
-            <label htmlFor="search">Search</label>
+        <>
+          <div className="flex pb-6 border-b-2 w-full items-center justify-center my-4 space-x-5">
+            {/* radio buttons */}
+            <div className="flex items-center space-x-2">
+              <input
+                type="radio"
+                name="screen"
+                id="search"
+                value="search"
+                checked={screen === "search"}
+                onChange={() => setScreen("search")}
+              />
+              <label htmlFor="search">Search</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="radio"
+                name="screen"
+                id="generate-new"
+                value="generate-new"
+                checked={screen === "generate-new"}
+                onChange={() => setScreen("generate-new")}
+              />
+              <label htmlFor="generate-new">Generate New</label>
+            </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <input
-              type="radio"
-              name="screen"
-              id="generate-new"
-              value="generate-new"
-              checked={screen === "generate-new"}
-              onChange={() => setScreen("generate-new")}
-            />
-            <label htmlFor="generate-new">Generate New</label>
-          </div>
-        </div>
+          {/* <div className="w-full border-2 border-b-2"></div> */}
+        </>
       )}
       {!isInitialized ? (
         <h2 className="text-2xl font-bold my-4">{startupMessage}</h2>
