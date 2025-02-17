@@ -9,6 +9,7 @@ interface SystemStatus {
 
 function App() {
   const [isInitialized, setIsInitialized] = useState(false);
+  const [screen, setScreen] = useState<"search" | "generate-new">("search");
   const [startupMessage, setStartupMessage] = useState("Initializing...");
   const [fullPasswordList, setFullPasswordList] = useState<string[]>([]);
   const [filteredPasswordList, setFilteredPasswordList] = useState<string[]>(
@@ -92,29 +93,61 @@ function App() {
   return (
     <main className="flex flex-col items-center justify-center">
       <h1 className="text-3xl font-bold my-4">Password Store</h1>
+      {isInitialized && (
+        <div className="flex items-center justify-center my-4 space-x-5">
+          {/* radio buttons */}
+          <div className="flex items-center space-x-2">
+            <input
+              type="radio"
+              name="screen"
+              id="search"
+              value="search"
+              checked={screen === "search"}
+              onChange={() => setScreen("search")}
+            />
+            <label htmlFor="search">Search</label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <input
+              type="radio"
+              name="screen"
+              id="generate-new"
+              value="generate-new"
+              checked={screen === "generate-new"}
+              onChange={() => setScreen("generate-new")}
+            />
+            <label htmlFor="generate-new">Generate New</label>
+          </div>
+        </div>
+      )}
       {!isInitialized ? (
         <h2 className="text-2xl font-bold my-4">{startupMessage}</h2>
       ) : (
         <>
-          <input
-            className="my-4"
-            type="text"
-            placeholder="Search..."
-            onChange={onSearchPathChange}
-          />
+          {screen === "search" ? (
+            <>
+              <input
+                className="my-4"
+                type="text"
+                placeholder="Search..."
+                onChange={onSearchPathChange}
+              />
 
-          {filteredPasswordList.map((entry) => (
-            <div
-              className="py-1 w-full bg-black rounded-lg mb-2 px-2 hover:bg-gray-800 cursor-pointer"
-              onClick={() => {
-                console.log("clicked on " + entry);
-                copyEncryptedPasswordToClipboard(entry);
-              }}
-              key={entry}
-            >
-              {entry}
-            </div>
-          ))}
+              {filteredPasswordList.map((entry) => (
+                <div
+                  className="py-1 w-full bg-black rounded-lg mb-2 px-2 hover:bg-gray-800 cursor-pointer"
+                  onClick={() => {
+                    copyEncryptedPasswordToClipboard(entry);
+                  }}
+                  key={entry}
+                >
+                  {entry}
+                </div>
+              ))}
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center"></div>
+          )}
         </>
       )}
     </main>
