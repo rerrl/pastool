@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import GenerateNewPass from "./components/GenerateNewPass";
+import SearchPassStore from "./components/SearchPassStore";
 
 interface SystemStatus {
   has_gpg: boolean;
@@ -12,41 +14,10 @@ function App() {
   const [screen, setScreen] = useState<"search" | "generate-new">("search");
   const [startupMessage, setStartupMessage] = useState("Initializing...");
   const [fullPasswordList, setFullPasswordList] = useState<string[]>([]);
-  const [filteredPasswordList, setFilteredPasswordList] = useState<string[]>(
-    []
-  );
 
   const makePathRelativeToPasswordStore = (path: string) => {
     return path.split(".password-store/")[1];
   };
-
-  const onSearchPathChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.value.length === 0) {
-      setFilteredPasswordList(fullPasswordList);
-      return;
-    }
-
-    const searchStrings = e.target.value.split(" ");
-    setFilteredPasswordList(
-      fullPasswordList.filter((entry) => {
-        return searchStrings.every((searchString) => {
-          return entry.includes(searchString);
-        });
-      })
-    );
-  };
-
-  async function copyEncryptedPasswordToClipboard(relativePath: string) {
-    try {
-      const result = (await invoke("copy_encrypted_password_to_clipboard", {
-        relativePath: relativePath.replace(".gpg", ""),
-      })) as string;
-
-      alert(result);
-    } catch (error) {
-      console.error(error);
-    }
-  }
 
   async function load_password_store() {
     const paths = (await invoke("load_password_store")) as string[];
@@ -55,7 +26,6 @@ function App() {
       makePathRelativeToPasswordStore(path)
     );
     setFullPasswordList(initialPasswordList);
-    setFilteredPasswordList(initialPasswordList);
   }
 
   async function initialize() {
@@ -125,28 +95,9 @@ function App() {
       ) : (
         <>
           {screen === "search" ? (
-            <>
-              <input
-                className="my-4"
-                type="text"
-                placeholder="Search..."
-                onChange={onSearchPathChange}
-              />
-
-              {filteredPasswordList.map((entry) => (
-                <div
-                  className="py-1 w-full bg-black rounded-lg mb-2 px-2 hover:bg-gray-800 cursor-pointer"
-                  onClick={() => {
-                    copyEncryptedPasswordToClipboard(entry);
-                  }}
-                  key={entry}
-                >
-                  {entry}
-                </div>
-              ))}
-            </>
+            <SearchPassStore passwordList={fullPasswordList} />
           ) : (
-            <div className="flex flex-col items-center justify-center"></div>
+            <GenerateNewPass />
           )}
         </>
       )}
