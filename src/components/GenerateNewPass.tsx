@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Checkbox from "./Checkbox";
 
 export default function GenerateNewPass() {
@@ -6,16 +6,17 @@ export default function GenerateNewPass() {
   const [noSymbolOnPassword, setNoSymbolOnPassword] = useState(false);
   const [passwordLength, setPasswordLength] = useState(25);
 
-  useEffect(() => {
-    console.log(passwordLength);
-  }, [passwordLength]);
+  const onGenerateClick = () => {
+    console.log(
+      `Generating password with length ${passwordLength}, no symbols: ${noSymbolOnPassword}`
+    );
+  };
 
   return (
-    <div>
-      <div className="flex items-center justify-center my-4 space-x-5">
+    <div className="flex flex-col items-center justify-center">
+      <div className="flex items-center justify-center space-x-5">
         <div>Password Length</div>
         <input
-          className="my-4"
           type="number"
           placeholder="Password Length"
           onChange={(e) =>
@@ -27,7 +28,7 @@ export default function GenerateNewPass() {
         />
       </div>
       {/* checkboxes */}
-      <div className="flex items-center justify-center my-4 space-x-5">
+      <div className="flex items-center justify-center space-x-5">
         <Checkbox
           checked={noSymbolOnPassword}
           onChange={(e) => {
@@ -37,6 +38,13 @@ export default function GenerateNewPass() {
           value="No Symbols"
         />
       </div>
+
+      <button
+        onClick={onGenerateClick}
+        className="bg-blue-500 w-full hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      >
+        Generate
+      </button>
     </div>
   );
 }
