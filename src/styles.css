@@ -99,9 +99,15 @@ button {
   outline: none;
 }
 
+.cake-bg {
+  background-image: url('./assets/cake-bg.svg');
+  background-attachment: fixed;
+  background-size: cover;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
-    color: #f6f6f6;
+    color: #e0b3da;
     background-color: #2f2f2f;
   }
 

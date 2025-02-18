@@ -17,7 +17,7 @@ Then, run the following commands:
 
 ```bash
 npm install
-npm run tauri dev
+npm run tauri:dev
 ```
 
 This will start the development server and open the app in your browser.
@@ -27,7 +27,7 @@ This will start the development server and open the app in your browser.
 To build the app, run the following command:
 
 ```bash
-npm run tauri build
+npm run tauri:build
 ```
 
 This will create a `dist` directory with the built app. Bundled builds can be found in th e`src-tauri/target/release` directory.

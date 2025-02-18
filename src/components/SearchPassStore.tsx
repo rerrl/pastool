@@ -51,7 +51,7 @@ export default function GenerateNewPass({
 
   return (
     <>
-      <div className="fixed top-[120px] left-0 w-full z-10 flex items-center justify-center bg-[#2f2f2f]">
+      <div className="fixed top-[120px] left-0 w-full z-10 flex items-center justify-center">
         <input
           ref={searchInputRef}
           className="my-4"

@@ -1,0 +1,24 @@
+<svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Bottom Cake Layer (light vanilla sponge) -->
+  <path d="M0 100 L100 100 L100 70 Q75 75 50 70 Q25 65 0 70 Z" fill="#F5E8C7" />
+
+  <!-- Middle Frosting Layer (light pastel pink) -->
+  <path d="M0 70 Q25 65 50 70 Q75 75 100 70 L100 50 Q75 55 50 50 Q25 45 0 50 Z" fill="#FFE4E1" />
+
+  <!-- Middle Cake Layer (light vanilla sponge) -->
+  <path d="M0 50 Q25 45 50 50 Q75 55 100 50 L100 30 Q75 35 50 30 Q25 25 0 30 Z" fill="#F5E8C7" />
+
+  <!-- Top Frosting Layer (white with sprinkles) -->
+  <path d="M0 30 Q25 25 50 30 Q75 35 100 30 L100 0 L0 0 Z" fill="#FFFFFF" />
+
+  <!-- Sprinkles on Top Layer -->
+  <rect x="10" y="17" width="2" height="2" fill="#FF6F61" rx="2" />
+  <rect x="20" y="22" width="2" height="2" fill="#FFD700" rx="2" />
+  <rect x="30" y="20" width="2" height="2" fill="#87CEEB" rx="2" />
+  <rect x="40" y="22" width="2" height="2" fill="#98FB98" rx="2" />
+  <rect x="50" y="18" width="2" height="2" fill="#FF69B4" rx="2" />
+  <rect x="60" y="21" width="2" height="2" fill="#FFA500" rx="2" />
+  <rect x="70" y="23" width="2" height="2" fill="#DDA0DD" rx="2" />
+  <rect x="80" y="19" width="2" height="2" fill="#00CED1" rx="2" />
+  <rect x="90" y="22" width="2" height="2" fill="#FFD700" rx="2" />
+</svg>

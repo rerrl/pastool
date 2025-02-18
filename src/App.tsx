@@ -72,12 +72,12 @@ function App() {
   }, [screen]);
 
   return (
-    <main className="flex flex-col items-center justify-center">
-      <div className="fixed top-0 left-0 w-full z-10 bg-[#2f2f2f]">
-        <h1 className="text-3xl font-bold my-4">Password Store</h1>
+    <main className="flex flex-col items-center justify-center cake-bg h-screen">
+      <div className="fixed top-0 left-0 w-full z-10">
+        <h1 className="text-3xl font-bold my-4">Pastool</h1>
         {isInitialized && (
           <>
-            <div className="flex pb-6 border-b-2 w-full items-center justify-center my-4 space-x-5">
+            <div className="flex pb-6 w-full items-center justify-center my-4 space-x-5">
               {/* radio buttons */}
               <div className="flex items-center space-x-2">
                 <input
@@ -102,7 +102,6 @@ function App() {
                 <label htmlFor="generate-new">Generate New</label>
               </div>
             </div>
-            {/* <div className="w-full border-2 border-b-2"></div> */}
           </>
         )}
       </div>
