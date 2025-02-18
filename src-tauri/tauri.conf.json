@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "rusty-bits",
+  "productName": "pastool",
   "version": "0.1.0",
-  "identifier": "com.rusty-bits.app",
+  "identifier": "com.pastool.app",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -12,9 +12,10 @@
   "app": {
     "windows": [
       {
-        "title": "rusty-bits",
+        "title": "pastool",
         "width": 400,
-        "height": 600
+        "height": 600,
+        "resizable": false
       }
     ],
     "security": {

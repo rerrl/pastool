@@ -153,7 +153,7 @@ export default function GenerateNewPass({ homeDir }: { homeDir: string }) {
               title="Click to copy to clipboard"
               disabled={showCopiedMessage}
               readOnly
-              onClick={(e) => {
+              onClick={() => {
                 setPasswordCopyClicked(passwordCopyClicked + 1);
                 invoke("copy_text_to_clipboard", {
                   text: generatedPassword,

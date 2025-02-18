@@ -51,25 +51,29 @@ export default function GenerateNewPass({
 
   return (
     <>
-      <input
-        ref={searchInputRef}
-        className="my-4"
-        type="text"
-        placeholder="Search..."
-        onChange={onSearchPathChange}
-      />
+      <div className="fixed top-[120px] left-0 w-full z-10 flex items-center justify-center bg-[#2f2f2f]">
+        <input
+          ref={searchInputRef}
+          className="my-4"
+          type="text"
+          placeholder="Search..."
+          onChange={onSearchPathChange}
+        />
+      </div>
 
-      {filteredPasswordList.map((entry) => (
-        <div
-          className="py-1 w-full bg-black rounded-lg mb-2 px-2 hover:bg-gray-800 cursor-pointer"
-          onClick={() => {
-            copyEncryptedPasswordToClipboard(entry);
-          }}
-          key={entry}
-        >
-          {entry}
-        </div>
-      ))}
+      <div className="flex-1 overflow-y-auto pt-16">
+        {filteredPasswordList.map((entry) => (
+          <div
+            className="py-1 w-full bg-black rounded-lg mb-2 px-2 hover:bg-gray-800 cursor-pointer"
+            onClick={() => {
+              copyEncryptedPasswordToClipboard(entry);
+            }}
+            key={entry}
+          >
+            {entry}
+          </div>
+        ))}
+      </div>
     </>
   );
 }

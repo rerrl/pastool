@@ -73,49 +73,54 @@ function App() {
 
   return (
     <main className="flex flex-col items-center justify-center">
-      <h1 className="text-3xl font-bold my-4">Password Store</h1>
-      {isInitialized && (
-        <>
-          <div className="flex pb-6 border-b-2 w-full items-center justify-center my-4 space-x-5">
-            {/* radio buttons */}
-            <div className="flex items-center space-x-2">
-              <input
-                type="radio"
-                name="screen"
-                id="search"
-                value="search"
-                checked={screen === "search"}
-                onChange={() => setScreen("search")}
-              />
-              <label htmlFor="search">Search</label>
+      <div className="fixed top-0 left-0 w-full z-10 bg-[#2f2f2f]">
+        <h1 className="text-3xl font-bold my-4">Password Store</h1>
+        {isInitialized && (
+          <>
+            <div className="flex pb-6 border-b-2 w-full items-center justify-center my-4 space-x-5">
+              {/* radio buttons */}
+              <div className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="screen"
+                  id="search"
+                  value="search"
+                  checked={screen === "search"}
+                  onChange={() => setScreen("search")}
+                />
+                <label htmlFor="search">Search</label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="screen"
+                  id="generate-new"
+                  value="generate-new"
+                  checked={screen === "generate-new"}
+                  onChange={() => setScreen("generate-new")}
+                />
+                <label htmlFor="generate-new">Generate New</label>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <input
-                type="radio"
-                name="screen"
-                id="generate-new"
-                value="generate-new"
-                checked={screen === "generate-new"}
-                onChange={() => setScreen("generate-new")}
-              />
-              <label htmlFor="generate-new">Generate New</label>
-            </div>
-          </div>
-          {/* <div className="w-full border-2 border-b-2"></div> */}
-        </>
-      )}
+            {/* <div className="w-full border-2 border-b-2"></div> */}
+          </>
+        )}
+      </div>
+
       {!isInitialized ? (
         <h2 className="text-2xl font-bold my-4">{startupMessage}</h2>
       ) : (
         <>
-          {screen === "search" ? (
-            <SearchPassStore
-              passwordList={fullPasswordList}
-              onFocusSearch={triggerFocusSearch}
-            />
-          ) : (
-            <GenerateNewPass homeDir={homeDir} />
-          )}
+          <div className="flex-1 overflow-y-auto pt-[150px] w-3/4 max-w-md">
+            {screen === "search" ? (
+              <SearchPassStore
+                passwordList={fullPasswordList}
+                onFocusSearch={triggerFocusSearch}
+              />
+            ) : (
+              <GenerateNewPass homeDir={homeDir} />
+            )}
+          </div>
         </>
       )}
     </main>
