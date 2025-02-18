@@ -2,16 +2,12 @@ use std::env;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
-use tauri::ipc::RuntimeCapability;
+use strip_ansi_escapes;
 use tauri::menu::{MenuBuilder, MenuItemBuilder};
-// use tauri::tray::MouseButton;
-// use tauri::tray::MouseButtonState;
-// use tauri::tray::TrayIconEvent;
 use tauri::tray::TrayIconBuilder;
 use tauri::Manager;
 use tauri_plugin_clipboard_manager::ClipboardExt;
 use tauri_plugin_dialog::DialogExt;
-use tauri_plugin_dialog::FileDialogBuilder;
 
 #[derive(serde::Serialize, serde::Deserialize)]
 struct SystemStatus {
@@ -109,6 +105,37 @@ async fn open_dialog(app: tauri::AppHandle) -> Result<String, String> {
     Ok(file_path.to_string())
 }
 
+#[tauri::command]
+fn generate_new_pass(
+    store_relative_path: String,
+    length: u32,
+    no_symbols: bool,
+) -> Result<String, String> {
+    let mut command = Command::new("pass");
+
+    command.arg("generate");
+    if no_symbols {
+        command.arg("-n");
+    }
+    command.arg(store_relative_path);
+    command.arg(length.to_string());
+
+    let output = command.output().unwrap();
+
+    let password_raw = String::from_utf8_lossy(&output.stdout)
+        .lines()
+        .nth(1)
+        .unwrap()
+        .to_string();
+
+    let plain_bytes = strip_ansi_escapes::strip(password_raw);
+    let password = String::from_utf8_lossy(&plain_bytes).to_string();
+
+    println!("{}", password);
+
+    Ok(password)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -145,24 +172,6 @@ pub fn run() {
                         dbg!("menu item unknown clicked");
                     }
                 })
-                // .on_tray_icon_event(|tray, event: TrayIconEvent| match event {
-                //     TrayIconEvent::Click {
-                //         button: MouseButton::Left,
-                //         button_state: MouseButtonState::Up,
-                //         ..
-                //     } => {
-                //         println!("left click pressed and released");
-                //         // in this example, let's show and focus the main window when the tray is clicked
-                //         let app = tray.app_handle();
-                //         if let Some(window) = app.get_webview_window("main") {
-                //             let _ = window.show();
-                //             let _ = window.set_focus();
-                //         }
-                //     }
-                //     _ => {
-                //         println!("unhandled event {event:?}");
-                //     }
-                // })
                 .build(app);
 
             Ok(())
@@ -171,7 +180,8 @@ pub fn run() {
             initialize,
             load_password_store,
             copy_encrypted_password_to_clipboard,
-            open_dialog
+            open_dialog,
+            generate_new_pass
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

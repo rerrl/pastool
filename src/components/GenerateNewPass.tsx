@@ -8,8 +8,10 @@ export default function GenerateNewPass({ homeDir }: { homeDir: string }) {
   const [passwordLength, setPasswordLength] = useState(25);
   const [saveFolder, setSaveFolder] = useState("~/.password-store");
   const [passwordName, setPasswordName] = useState("");
+  const [generatedPassword, setGeneratedPassword] = useState("");
+  const [obscurePassword, setObscurePassword] = useState(false);
 
-  const onGenerateClick = () => {
+  const onGenerateClick = async () => {
     console.log({
       fullPath:
         saveFolder.replace("~", homeDir) +
@@ -20,8 +22,27 @@ export default function GenerateNewPass({ homeDir }: { homeDir: string }) {
       noSymbols: noSymbolOnPassword,
     });
 
+    const fullPath =
+      saveFolder.replace("~", homeDir) +
+      "/" +
+      passwordName.replace(".gpg", "") +
+      ".gpg";
+
+    const storeRelativePath = fullPath
+      .split(".password-store/")[1]
+      .replace(".gpg", "");
+
     // Make sure to throw from the invoke call if this file already exists.
     // There is no support for overwriting using pass right now
+    const password = (await invoke("generate_new_pass", {
+      storeRelativePath,
+      length: passwordLength,
+      noSymbols: noSymbolOnPassword,
+    })) as string;
+
+    console.log(password);
+
+    setGeneratedPassword(password);
   };
 
   const onSelectFolderClick = async () => {
@@ -93,6 +114,7 @@ export default function GenerateNewPass({ homeDir }: { homeDir: string }) {
           />
         </div>
 
+        {/* border */}
         <div className="w-full border border-b-2" />
 
         {/* final path */}
@@ -107,12 +129,26 @@ export default function GenerateNewPass({ homeDir }: { homeDir: string }) {
         </div>
 
         {/* generate pass button */}
-        <button
-          onClick={onGenerateClick}
-          disabled={passwordName.length === 0 || passwordLength === 0}
-        >
-          Generate
-        </button>
+        <div className="flex flex-col w-full items-center justify-center">
+          <div className="flex flex-row items-center justify-center space-x-4">
+            <input
+              className="w-full"
+              type="text"
+              value={generatedPassword}
+              readOnly
+              onClick={(e) => {
+                console.log("copying " + generatedPassword + " to clipboard");
+              }}
+            />
+
+            <button
+              onClick={onGenerateClick}
+              disabled={passwordName.length === 0 || passwordLength === 0}
+            >
+              Generate
+            </button>
+          </div>
+        </div>
       </div>
     </>
   );
