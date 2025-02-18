@@ -1,14 +1,25 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 
 export default function GenerateNewPass({
   passwordList,
+  onFocusSearch,
 }: {
   passwordList: string[];
+  onFocusSearch: number;
 }) {
   //   const [fullPasswordList, _] = useState<string[]>(passwordList);
   const [filteredPasswordList, setFilteredPasswordList] =
     useState<string[]>(passwordList);
+
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Focus on the input when this effect is triggered
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [onFocusSearch]); // This effect runs when onFocusSearch changes
 
   async function copyEncryptedPasswordToClipboard(relativePath: string) {
     try {
@@ -30,7 +41,7 @@ export default function GenerateNewPass({
 
     const searchStrings = e.target.value.split(" ");
     setFilteredPasswordList(
-        passwordList.filter((entry) => {
+      passwordList.filter((entry) => {
         return searchStrings.every((searchString) => {
           return entry.includes(searchString);
         });
@@ -41,6 +52,7 @@ export default function GenerateNewPass({
   return (
     <>
       <input
+        ref={searchInputRef}
         className="my-4"
         type="text"
         placeholder="Search..."

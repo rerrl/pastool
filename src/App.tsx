@@ -16,6 +16,7 @@ function App() {
   const [startupMessage, setStartupMessage] = useState("Initializing...");
   const [fullPasswordList, setFullPasswordList] = useState<string[]>([]);
   const [homeDir, setHomeDir] = useState("");
+  const [triggerFocusSearch, setTriggerFocusSearch] = useState(0);
 
   const makePathRelativeToPasswordStore = (path: string) => {
     return path.split(".password-store/")[1];
@@ -64,6 +65,12 @@ function App() {
     initialize();
   }, []);
 
+  useEffect(() => {
+    if (screen === "search") {
+      setTriggerFocusSearch(triggerFocusSearch + 1);
+    }
+  }, [screen]);
+
   return (
     <main className="flex flex-col items-center justify-center">
       <h1 className="text-3xl font-bold my-4">Password Store</h1>
@@ -102,7 +109,10 @@ function App() {
       ) : (
         <>
           {screen === "search" ? (
-            <SearchPassStore passwordList={fullPasswordList} />
+            <SearchPassStore
+              passwordList={fullPasswordList}
+              onFocusSearch={triggerFocusSearch}
+            />
           ) : (
             <GenerateNewPass homeDir={homeDir} />
           )}
