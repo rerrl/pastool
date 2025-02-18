@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Checkbox from "./Checkbox";
 import { invoke } from "@tauri-apps/api/core";
 
@@ -9,7 +9,9 @@ export default function GenerateNewPass({ homeDir }: { homeDir: string }) {
   const [saveFolder, setSaveFolder] = useState("~/.password-store");
   const [passwordName, setPasswordName] = useState("");
   const [generatedPassword, setGeneratedPassword] = useState("");
-  const [obscurePassword, setObscurePassword] = useState(false);
+  const [passwordCopyClicked, setPasswordCopyClicked] = useState(0);
+  const [showCopiedMessage, setShowCopiedMessage] = useState(false);
+  // const [obscurePassword, setObscurePassword] = useState(false);
 
   const onGenerateClick = async () => {
     console.log({
@@ -56,6 +58,17 @@ export default function GenerateNewPass({ homeDir }: { homeDir: string }) {
       }
     }
   };
+
+  useEffect(() => {
+    if (showCopiedMessage) return;
+
+    if (passwordCopyClicked > 0) {
+      setShowCopiedMessage(true);
+      setTimeout(() => {
+        setShowCopiedMessage(false);
+      }, 2000);
+    }
+  }, [passwordCopyClicked]);
 
   return (
     <>
@@ -132,12 +145,19 @@ export default function GenerateNewPass({ homeDir }: { homeDir: string }) {
         <div className="flex flex-col w-full items-center justify-center">
           <div className="flex flex-row items-center justify-center space-x-4">
             <input
-              className="w-full"
+              className="w-full hover:cursor-pointer"
               type="text"
-              value={generatedPassword}
+              value={
+                showCopiedMessage ? "Copied to Clipboard!" : generatedPassword
+              }
+              title="Click to copy to clipboard"
+              disabled={showCopiedMessage}
               readOnly
               onClick={(e) => {
-                console.log("copying " + generatedPassword + " to clipboard");
+                setPasswordCopyClicked(passwordCopyClicked + 1);
+                invoke("copy_text_to_clipboard", {
+                  text: generatedPassword,
+                });
               }}
             />
 

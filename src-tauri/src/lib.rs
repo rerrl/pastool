@@ -88,6 +88,11 @@ async fn copy_encrypted_password_to_clipboard(
 }
 
 #[tauri::command]
+fn copy_text_to_clipboard(text: String, app: tauri::AppHandle) -> () {
+    let _ = app.clipboard().write_text(text);
+}
+
+#[tauri::command]
 async fn open_dialog(app: tauri::AppHandle) -> Result<String, String> {
     let home_dir =
         env::home_dir().ok_or_else(|| "Failed to retrieve home directory".to_string())?;
@@ -179,6 +184,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             initialize,
             load_password_store,
+            copy_text_to_clipboard,
             copy_encrypted_password_to_clipboard,
             open_dialog,
             generate_new_pass
