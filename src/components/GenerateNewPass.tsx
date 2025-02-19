@@ -11,7 +11,7 @@ export default function GenerateNewPass({ homeDir }: { homeDir: string }) {
   const [generatedPassword, setGeneratedPassword] = useState("");
   const [passwordCopyClicked, setPasswordCopyClicked] = useState(0);
   const [showCopiedMessage, setShowCopiedMessage] = useState(false);
-  // const [obscurePassword, setObscurePassword] = useState(false);
+  const [hidePassword, setHidePassword] = useState(true);
 
   const onGenerateClick = async () => {
     console.log({
@@ -57,6 +57,10 @@ export default function GenerateNewPass({ homeDir }: { homeDir: string }) {
         console.error(error);
       }
     }
+  };
+
+  const toggleHidePassword = () => {
+    setHidePassword(!hidePassword);
   };
 
   useEffect(() => {
@@ -142,15 +146,17 @@ export default function GenerateNewPass({ homeDir }: { homeDir: string }) {
 
         {/* generate pass button */}
         <div className="flex flex-col w-full items-center justify-center">
-          <div className="flex flex-row items-center justify-center space-x-4">
+          <div className="flex flex-row items-center justify-center space-x-4 mb-4">
             <input
-              className="w-full wafer"
-              type="text"
+              className="w-full disabled:cursor-not-allowed cursor-pointer"
+              type={
+                showCopiedMessage ? "text" : hidePassword ? "password" : "text"
+              }
               value={
                 showCopiedMessage ? "Copied to Clipboard!" : generatedPassword
               }
               title="Click to copy to clipboard"
-              disabled={showCopiedMessage}
+              disabled={generatedPassword.length === 0}
               readOnly
               onClick={() => {
                 setPasswordCopyClicked(passwordCopyClicked + 1);
@@ -159,13 +165,21 @@ export default function GenerateNewPass({ homeDir }: { homeDir: string }) {
                 });
               }}
             />
-
+          </div>
+          <div className="flex flex-row items-center justify-center space-x-4">
             <button
               onClick={onGenerateClick}
               className="wafer"
               disabled={passwordName.length === 0 || passwordLength === 0}
             >
               Generate
+            </button>
+            <button
+              onClick={toggleHidePassword}
+              className="wafer"
+              disabled={generatedPassword.length === 0}
+            >
+              {hidePassword ? "Show" : "Hide"}
             </button>
           </div>
         </div>
