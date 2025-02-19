@@ -45,8 +45,11 @@ This will create a `dist` directory with the built app. Bundled builds can be fo
 
 To Add:
 
+- [ ] icons
 - [ ] git integration
-- [ ] better theme
+- [ ] better themes
+  - [ ] dark mode
+  - [x] light mode
 - better generate page
   - [ ] more consistent UI
   - [ ] add custom symbols to password generation
@@ -55,4 +58,3 @@ To Add:
   - [ ] add password obfuscation in generated page (hide/show)
 - better search page
   - [ ] better name listing (overflow and enabled horizontal scroll. Maybe a tree view?)
-  - [ ] click password to copy or to view (edit?)

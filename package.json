@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "tauri:build": "NO_STRIP=true tauri build",
-    "tauri:dev": "tauri dev"
+    "tauri:dev": "tauri dev",
+    "tauri:icon": "tauri icon src/assets/app-icon.png"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.6",
