@@ -74,10 +74,10 @@ function App() {
   return (
     <main className="flex flex-col items-center justify-center cake-bg h-screen">
       <div className="fixed top-0 left-0 w-full z-10">
-        <h1 className="text-3xl font-bold my-4">Pastool</h1>
+        <h1 className="text-[64px] mt-8 mb-5 title">Pastool</h1>
         {isInitialized && (
           <>
-            <div className="flex pb-6 w-full items-center justify-center my-4 space-x-5">
+            <div className="flex pb-6 w-full items-center justify-center my-4 space-x-5 text-red-500">
               {/* radio buttons */}
               <div className="flex items-center space-x-2">
                 <input
@@ -110,7 +110,11 @@ function App() {
         <h2 className="text-2xl font-bold my-4">{startupMessage}</h2>
       ) : (
         <>
-          <div className="flex-1 overflow-y-auto pt-[150px] w-3/4 max-w-md">
+          <div
+            className={`flex-1 overflow-y-auto ${
+              screen === "search" ? "mt-[220px]" : "mt-[150px]"
+            } w-3/4 max-w-md`}
+          >
             {screen === "search" ? (
               <SearchPassStore
                 passwordList={fullPasswordList}

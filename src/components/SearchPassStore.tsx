@@ -51,7 +51,7 @@ export default function GenerateNewPass({
 
   return (
     <>
-      <div className="fixed top-[120px] left-0 w-full z-10 flex items-center justify-center">
+      <div className="fixed top-[140px] left-0 w-full z-10 flex items-center justify-center">
         <input
           ref={searchInputRef}
           className="my-4"
@@ -61,7 +61,7 @@ export default function GenerateNewPass({
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto pt-16">
+      <div className="flex-1 overflow-y-auto">
         {filteredPasswordList.map((entry) => (
           <div
             className="py-1 w-full bg-black rounded-lg mb-2 px-2 hover:bg-gray-800 cursor-pointer"
