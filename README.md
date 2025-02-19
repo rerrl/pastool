@@ -4,6 +4,10 @@ Pass, with Frosting!
 
 Pastool is a Rust-powered GUI wrapper for pass, making your password management even sweeter.
 
+![image](https://github.com/user-attachments/assets/c4043590-e007-4095-86f5-8fee574141ac)
+![image](https://github.com/user-attachments/assets/d147b337-a452-47a4-b5bf-c7b0a7f92c5a)
+
+
 ## Development
 
 PRs are welcome, but please open an issue first to discuss your ideas, unless it's something trivial.
