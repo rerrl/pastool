@@ -77,7 +77,7 @@ function App() {
         <h1 className="text-[64px] mt-8 mb-5 title">Pastool</h1>
         {isInitialized && (
           <>
-            <div className="flex pb-6 w-full items-center justify-center my-4 space-x-5 text-red-500">
+            <div className="flex pb-6 w-full items-center justify-center my-4 space-x-5 text-[#664316]">
               {/* radio buttons */}
               <div className="flex items-center space-x-2">
                 <input
