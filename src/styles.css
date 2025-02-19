@@ -5,6 +5,10 @@
   src: url("./assets/fonts/Damion-Regular.ttf");
 }
 
+/* make tailwind shortcuts work */
+.wafer {
+  @apply bg-[#664316]/85 text-white border-[#664316] border-2 rounded-lg hover:bg-[#664316] cursor-pointer;
+}
 
 .title {
   font-family: Damion;
@@ -91,7 +95,7 @@ button {
 
 @media (prefers-color-scheme: dark) {
   :root {
-    color: #f6f6f6;
+    color: #664316;
     background-color: #2f2f2f;
   }
 

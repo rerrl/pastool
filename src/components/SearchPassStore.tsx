@@ -64,7 +64,7 @@ export default function GenerateNewPass({
       <div className="flex-1 overflow-y-auto">
         {filteredPasswordList.map((entry) => (
           <div
-            className="py-1 w-full bg-[#664316]/85  border-[#664316] border-2 rounded-lg mb-2 px-2 hover:bg-[#664316] cursor-pointer"
+            className="w-full wafer mb-2 p-2"
             onClick={() => {
               copyEncryptedPasswordToClipboard(entry);
             }}

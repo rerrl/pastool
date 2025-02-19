@@ -76,10 +76,7 @@ export default function GenerateNewPass({ homeDir }: { homeDir: string }) {
         {/* save folder */}
         <div>
           <div>Save Folder:</div>
-          <button
-            onClick={onSelectFolderClick}
-            className="bg-blue-500 w-full hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          >
+          <button onClick={onSelectFolderClick} className="wafer">
             {saveFolder}
           </button>
         </div>
@@ -90,6 +87,7 @@ export default function GenerateNewPass({ homeDir }: { homeDir: string }) {
           <input
             type="text"
             value={passwordName}
+            className="wafer"
             onChange={(e) => {
               // ignore spaces
               if (e.target.value.includes(" ")) {
@@ -106,6 +104,7 @@ export default function GenerateNewPass({ homeDir }: { homeDir: string }) {
           <input
             type="number"
             placeholder="Password Length"
+            className="wafer"
             onChange={(e) =>
               setPasswordLength(parseInt(e.target.value as string))
             }
@@ -145,7 +144,7 @@ export default function GenerateNewPass({ homeDir }: { homeDir: string }) {
         <div className="flex flex-col w-full items-center justify-center">
           <div className="flex flex-row items-center justify-center space-x-4">
             <input
-              className="w-full hover:cursor-pointer"
+              className="w-full wafer"
               type="text"
               value={
                 showCopiedMessage ? "Copied to Clipboard!" : generatedPassword
@@ -163,6 +162,7 @@ export default function GenerateNewPass({ homeDir }: { homeDir: string }) {
 
             <button
               onClick={onGenerateClick}
+              className="wafer"
               disabled={passwordName.length === 0 || passwordLength === 0}
             >
               Generate
