@@ -1,16 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 
-export default function GenerateNewPass({
+export default function SearchPassStore({
   passwordList,
   onFocusSearch,
 }: {
   passwordList: string[];
   onFocusSearch: number;
 }) {
-  //   const [fullPasswordList, _] = useState<string[]>(passwordList);
   const [filteredPasswordList, setFilteredPasswordList] =
     useState<string[]>(passwordList);
+  const [copiedEntry, setCopiedEntry] = useState<string | null>(null);
+  const [copyError, setCopyError] = useState("");
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -21,15 +22,22 @@ export default function GenerateNewPass({
     }
   }, [onFocusSearch]); // This effect runs when onFocusSearch changes
 
-  async function copyEncryptedPasswordToClipboard(relativePath: string) {
-    try {
-      const result = (await invoke("copy_encrypted_password_to_clipboard", {
-        relativePath: relativePath.replace(".gpg", ""),
-      })) as string;
+  useEffect(() => {
+    if (copiedEntry === null) return;
+    const timeout = setTimeout(() => setCopiedEntry(null), 2000);
+    return () => clearTimeout(timeout);
+  }, [copiedEntry]);
 
-      alert(result);
+  async function copyEncryptedPasswordToClipboard(relativePath: string) {
+    setCopyError("");
+    try {
+      await invoke("copy_encrypted_password_to_clipboard", {
+        relativePath: relativePath.replace(".gpg", ""),
+      });
+      setCopiedEntry(relativePath);
     } catch (error) {
       console.error(error);
+      setCopyError(typeof error === "string" ? error : "Failed to copy.");
     }
   }
 
@@ -61,16 +69,23 @@ export default function GenerateNewPass({
         />
       </div>
 
+      {copyError && (
+        <div className="text-red-600 text-sm text-center mb-2">{copyError}</div>
+      )}
+
       <div className="flex-1 overflow-y-auto">
         {filteredPasswordList.map((entry) => (
           <div
-            className="w-full wafer mb-2 p-2"
+            className="w-full wafer mb-2 p-2 flex items-center justify-between"
             onClick={() => {
               copyEncryptedPasswordToClipboard(entry);
             }}
             key={entry}
           >
-            {entry}
+            <span>{entry}</span>
+            {copiedEntry === entry && (
+              <span className="ml-2 text-sm opacity-70">Copied!</span>
+            )}
           </div>
         ))}
       </div>
