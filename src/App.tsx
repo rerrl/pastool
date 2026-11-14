@@ -1,19 +1,16 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import GenerateNewPass from "./components/GenerateNewPass";
+import OnboardingWizard from "./components/OnboardingWizard";
 import SearchPassStore from "./components/SearchPassStore";
-
-interface SystemStatus {
-  has_gpg: boolean;
-  has_pass: boolean;
-  has_pass_store: boolean;
-  home_dir: string;
-}
+import type { GpgKey, SystemStatus } from "./types";
 
 function App() {
   const [isInitialized, setIsInitialized] = useState(false);
+  const [status, setStatus] = useState<SystemStatus | null>(null);
   const [screen, setScreen] = useState<"search" | "generate-new">("search");
   const [startupMessage, setStartupMessage] = useState("Initializing...");
+  const [initError, setInitError] = useState("");
   const [fullPasswordList, setFullPasswordList] = useState<string[]>([]);
   const [homeDir, setHomeDir] = useState("");
   const [triggerFocusSearch, setTriggerFocusSearch] = useState(0);
@@ -32,33 +29,42 @@ function App() {
   }
 
   async function initialize() {
+    setInitError("");
+    setStartupMessage("Initializing...");
     try {
       const res = (await invoke("initialize")) as SystemStatus;
+      setStatus(res);
 
-      if (!res.has_pass_store) {
-        setStartupMessage(
-          "No password store found! Try `pass init` and try again."
-        );
-        return;
+      // Everything present *and* the user already has a key to unlock the
+      // store: skip onboarding entirely.
+      if (res.has_gpg && res.has_pass && res.has_pass_store) {
+        const keys = (await invoke("list_secret_keys")) as GpgKey[];
+        if (keys.length > 0) {
+          setHomeDir(res.home_dir);
+          await load_password_store();
+          setIsInitialized(true);
+          return;
+        }
       }
 
-      if (!res.has_pass) {
-        setStartupMessage("No pass found! Install pass and try again.");
-        return;
-      }
-
-      if (!res.has_gpg) {
-        setStartupMessage("No gpg found! Install gpg and try again.");
-        return;
-      }
-
-      setHomeDir(res.home_dir);
-
-      await load_password_store();
-      setIsInitialized(true);
+      // Something is missing -- the wizard collects the rest.
+      setIsInitialized(false);
     } catch (error) {
       console.error(error);
+      setInitError(
+        typeof error === "string"
+          ? error
+          : "Something went wrong while starting up."
+      );
     }
+  }
+
+  async function finishOnboarding() {
+    if (status) {
+      setHomeDir(status.home_dir);
+    }
+    await load_password_store();
+    setIsInitialized(true);
   }
 
   useEffect(() => {
@@ -106,25 +112,47 @@ function App() {
         )}
       </div>
 
-      {!isInitialized ? (
-        <h2 className="text-2xl font-bold my-4">{startupMessage}</h2>
+      {isInitialized ? (
+        <div
+          className={`flex-1 overflow-y-auto ${
+            screen === "search" ? "mt-[220px]" : "mt-[150px]"
+          } w-3/4 max-w-md`}
+        >
+          {screen === "search" ? (
+            <SearchPassStore
+              passwordList={fullPasswordList}
+              onFocusSearch={triggerFocusSearch}
+            />
+          ) : (
+            <GenerateNewPass homeDir={homeDir} />
+          )}
+        </div>
       ) : (
-        <>
-          <div
-            className={`flex-1 overflow-y-auto ${
-              screen === "search" ? "mt-[220px]" : "mt-[150px]"
-            } w-3/4 max-w-md`}
-          >
-            {screen === "search" ? (
-              <SearchPassStore
-                passwordList={fullPasswordList}
-                onFocusSearch={triggerFocusSearch}
-              />
+        <div className="flex-1 w-3/4 max-w-lg overflow-y-auto mt-[130px] mb-6">
+          {status === null ? (
+            initError ? (
+              <div className="flex flex-col items-center text-center space-y-4">
+                <h2 className="text-2xl font-bold my-4">
+                  We couldn't start up
+                </h2>
+                <div className="text-red-600 text-sm max-w-md">{initError}</div>
+                <button className="wafer" onClick={initialize}>
+                  Try again
+                </button>
+              </div>
             ) : (
-              <GenerateNewPass homeDir={homeDir} />
-            )}
-          </div>
-        </>
+              <h2 className="text-2xl font-bold my-4 text-center">
+                {startupMessage}
+              </h2>
+            )
+          ) : (
+            <OnboardingWizard
+              status={status}
+              onRecheck={initialize}
+              onComplete={finishOnboarding}
+            />
+          )}
+        </div>
       )}
     </main>
   );
