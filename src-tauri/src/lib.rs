@@ -2,6 +2,7 @@ use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
 use tauri::menu::{MenuBuilder, MenuItemBuilder};
 use tauri::tray::TrayIconBuilder;
@@ -11,6 +12,18 @@ use tauri_plugin_dialog::DialogExt;
 
 /// How long a copied secret stays on the clipboard before we try to clear it.
 const CLIPBOARD_CLEAR_SECONDS: u64 = 45;
+
+/// Monotonic id of the most recent clipboard copy, used to let only the newest
+/// scheduled clear act on the clipboard.
+static CLIPBOARD_CLEAR_GENERATION: AtomicU64 = AtomicU64::new(0);
+
+fn next_clipboard_clear_generation() -> u64 {
+    CLIPBOARD_CLEAR_GENERATION.fetch_add(1, Ordering::SeqCst) + 1
+}
+
+fn is_current_clipboard_generation(generation: u64) -> bool {
+    CLIPBOARD_CLEAR_GENERATION.load(Ordering::SeqCst) == generation
+}
 
 #[derive(serde::Serialize, serde::Deserialize)]
 struct SystemStatus {
@@ -35,14 +48,26 @@ fn first_line(output: &str) -> &str {
 
 /// Schedule the clipboard to be cleared after `CLIPBOARD_CLEAR_SECONDS`, but
 /// only when it still holds the value we wrote (mirrors `pass -c` semantics).
+///
+/// Every copy takes a new generation number and supersedes the previous timer:
+/// re-copying within the window restarts the 45s clock instead of letting the
+/// older timer clear the secret the newer copy just wrote.
 fn schedule_clipboard_clear(app: &tauri::AppHandle, expected: String) {
     let app = app.clone();
+    let generation = next_clipboard_clear_generation();
+
     std::thread::spawn(move || {
         std::thread::sleep(Duration::from_secs(CLIPBOARD_CLEAR_SECONDS));
 
+        // A newer copy owns the clear now; leaving the clipboard alone keeps
+        // its full 45s window intact.
+        if !is_current_clipboard_generation(generation) {
+            return;
+        }
+
         if let Ok(current) = app.clipboard().read_text() {
             if current == expected {
-                let _ = app.clipboard().write_text(String::new());
+                let _ = app.clipboard().clear();
             }
         }
     });
@@ -301,6 +326,19 @@ mod tests {
         let missing = env::temp_dir().join("pastool-missing-dir-xyz");
         let _ = fs::remove_dir_all(&missing);
         assert!(search_for_gpg_files(&missing).is_err());
+    }
+
+    #[test]
+    fn newer_copy_supersedes_older_scheduled_clear() {
+        // Re-copying the same secret within the 45s window must restart the
+        // window: the older timer may not clear what the newer copy just wrote.
+        let first = next_clipboard_clear_generation();
+        assert!(is_current_clipboard_generation(first));
+
+        let second = next_clipboard_clear_generation();
+        assert!(second > first);
+        assert!(!is_current_clipboard_generation(first));
+        assert!(is_current_clipboard_generation(second));
     }
 
     #[test]
