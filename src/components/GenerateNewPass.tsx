@@ -12,39 +12,38 @@ export default function GenerateNewPass({ homeDir }: { homeDir: string }) {
   const [passwordCopyClicked, setPasswordCopyClicked] = useState(0);
   const [showCopiedMessage, setShowCopiedMessage] = useState(false);
   const [hidePassword, setHidePassword] = useState(true);
+  const [generateError, setGenerateError] = useState("");
 
   const onGenerateClick = async () => {
-    console.log({
-      fullPath:
+    setGenerateError("");
+
+    try {
+      const fullPath =
         saveFolder.replace("~", homeDir) +
         "/" +
         passwordName.replace(".gpg", "") +
-        ".gpg",
-      length: passwordLength,
-      noSymbols: noSymbolOnPassword,
-    });
+        ".gpg";
 
-    const fullPath =
-      saveFolder.replace("~", homeDir) +
-      "/" +
-      passwordName.replace(".gpg", "") +
-      ".gpg";
+      const storeRelativePath = fullPath
+        .split(".password-store/")[1]
+        .replace(".gpg", "");
 
-    const storeRelativePath = fullPath
-      .split(".password-store/")[1]
-      .replace(".gpg", "");
+      // The backend refuses to overwrite an existing entry and returns an
+      // error we can show inline instead of clobbering the file.
+      const password = (await invoke("generate_new_pass", {
+        storeRelativePath,
+        length: passwordLength,
+        noSymbols: noSymbolOnPassword,
+      })) as string;
 
-    // Make sure to throw from the invoke call if this file already exists.
-    // There is no support for overwriting using pass right now
-    const password = (await invoke("generate_new_pass", {
-      storeRelativePath,
-      length: passwordLength,
-      noSymbols: noSymbolOnPassword,
-    })) as string;
-
-    console.log(password);
-
-    setGeneratedPassword(password);
+      setGeneratedPassword(password);
+    } catch (error) {
+      console.error(error);
+      setGeneratedPassword("");
+      setGenerateError(
+        typeof error === "string" ? error : "Failed to generate password."
+      );
+    }
   };
 
   const onSelectFolderClick = async () => {
@@ -158,11 +157,22 @@ export default function GenerateNewPass({ homeDir }: { homeDir: string }) {
               title="Click to copy to clipboard"
               disabled={generatedPassword.length === 0}
               readOnly
-              onClick={() => {
-                setPasswordCopyClicked(passwordCopyClicked + 1);
-                invoke("copy_text_to_clipboard", {
-                  text: generatedPassword,
-                });
+              onClick={async () => {
+                // Only claim success once the backend confirms the write.
+                setGenerateError("");
+                try {
+                  await invoke("copy_text_to_clipboard", {
+                    text: generatedPassword,
+                  });
+                  setPasswordCopyClicked(passwordCopyClicked + 1);
+                } catch (error) {
+                  console.error(error);
+                  setGenerateError(
+                    typeof error === "string"
+                      ? error
+                      : "Failed to copy password."
+                  );
+                }
               }}
             />
           </div>
@@ -182,6 +192,11 @@ export default function GenerateNewPass({ homeDir }: { homeDir: string }) {
               {hidePassword ? "Show" : "Hide"}
             </button>
           </div>
+          {generateError && (
+            <div className="text-red-600 text-sm text-center max-w-md">
+              {generateError}
+            </div>
+          )}
         </div>
       </div>
     </>
