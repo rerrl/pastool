@@ -157,11 +157,22 @@ export default function GenerateNewPass({ homeDir }: { homeDir: string }) {
               title="Click to copy to clipboard"
               disabled={generatedPassword.length === 0}
               readOnly
-              onClick={() => {
-                setPasswordCopyClicked(passwordCopyClicked + 1);
-                invoke("copy_text_to_clipboard", {
-                  text: generatedPassword,
-                });
+              onClick={async () => {
+                // Only claim success once the backend confirms the write.
+                setGenerateError("");
+                try {
+                  await invoke("copy_text_to_clipboard", {
+                    text: generatedPassword,
+                  });
+                  setPasswordCopyClicked(passwordCopyClicked + 1);
+                } catch (error) {
+                  console.error(error);
+                  setGenerateError(
+                    typeof error === "string"
+                      ? error
+                      : "Failed to copy password."
+                  );
+                }
               }}
             />
           </div>
